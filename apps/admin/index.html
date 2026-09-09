@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEGEN Admin</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #151922;
+    }
+
+    header {
+      background: #151922;
+      color: white;
+      padding: 18px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0 0 5px;
+      font-size: 22px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: .7;
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    .login {
+      max-width: 420px;
+      margin: 80px auto;
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px rgba(0,0,0,.08);
+    }
+
+    .login h2 {
+      margin-top: 0;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #d7dce2;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    button {
+      background: #3866e0;
+      color: white;
+      border: 0;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    button.danger {
+      background: #dc3545;
+    }
+
+    button.success {
+      background: #198754;
+    }
+
+    button.gray {
+      background: #6c757d;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 18px;
+      padding-bottom: 4px;
+    }
+
+    .tabs button {
+      width: auto;
+      white-space: nowrap;
+      background: white;
+      color: #151922;
+      border: 1px solid #ddd;
+    }
+
+    .tabs button.active {
+      background: #3866e0;
+      color: white;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 3px 15px rgba(0,0,0,.05);
+    }
+
+    .stat small {
+      color: #6c757d;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 25px;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 3px 15px rgba(0,0,0,.05);
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .actions button {
+      width: auto;
+      flex: 1;
+      min-width: 110px;
+    }
+
+    .product-image {
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      background: #eee;
+    }
+
+    .old-price {
+      color: #888;
+      text-decoration: line-through;
+      margin-right: 8px;
+    }
+
+    .price {
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      background: #eef1f7;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .order-item {
+      padding: 7px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .muted {
+      color: #777;
+    }
+
+    .error {
+      color: #dc3545;
+      margin-top: 10px;
+    }
+
+    .success-text {
+      color: #198754;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+
+      .actions button {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loginPage" class="login">
+    <h2>🔐 TEGEN Admin</h2>
+    <p class="muted">Admin panelga kirish</p>
+
+    <div class="form-group">
+      <label>Admin token</label>
+      <input id="tokenInput" type="password" placeholder="ADMIN_TOKEN" />
+    </div>
+
+    <button onclick="login()">Kirish</button>
+
+    <div id="loginError" class="error"></div>
+  </div>
+
+
+  <div id="adminPage" class="hidden">
+
+    <header>
+      <h1>🛒 TEGEN Admin Panel</h1>
+      <p>Do‘kon boshqaruvi</p>
+    </header>
+
+    <main class="container">
+
+      <div class="tabs">
+        <button class="active" onclick="showTab('dashboard', this)">📊 Bosh sahifa</button>
+        <button onclick="showTab('products', this)">📦 Mahsulotlar</button>
+        <button onclick="showTab('categories', this)">📂 Kategoriyalar</button>
+        <button onclick="showTab('orders', this)">🧾 Buyurtmalar</button>
+        <button onclick="showTab('workers', this)">👨‍💼 Ishchilar</button>
+        <button onclick="showTab('proposals', this)">💡 Takliflar</button>
+        <button onclick="showTab('analytics', this)">📈 Tahlil</button>
+        <button class="gray" onclick="logout()">🚪 Chiqish</button>
+      </div>
+
+
+      <!-- DASHBOARD -->
+
+      <section id="dashboard" class="section active">
+
+        <div class="stats">
+          <div class="stat">
+            <small>Buyurtmalar</small>
+            <strong id="statOrders">0</strong>
+          </div>
+
+          <div class="stat">
+            <small>Mahsulotlar</small>
+            <strong id="statProducts">0</strong>
+          </div>
+
+          <div class="stat">
+            <small>Mijozlar</small>
+            <strong id="statUsers">0</strong>
+          </div>
+
+          <div class="stat">
+            <small>Tushum</small>
+            <strong id="statRevenue">0 so‘m</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Buyurtma holatlari</h3>
+          <div id="statusStats"></div>
+        </div>
+
+      </section>
+
+
+      <!-- PRODUCTS -->
+
+      <section id="products" class="section">
+
+        <div class="card">
+          <h3>➕ Mahsulot qo‘shish</h3>
+
+          <div class="grid">
+
+            <div class="form-group">
+              <label>Nomi</label>
+              <input id="productName" placeholder="Mahsulot nomi" />
+            </div>
+
+            <div class="form-group">
+              <label>Kategoriya</label>
+              <select id="productCategory"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Yangi narx</label>
+              <input id="productPrice" type="number" placeholder="2499000" />
+            </div>
+
+            <div class="form-group">
+              <label>Eski narx</label>
+              <input id="productOldPrice" type="number" placeholder="2899000" />
+            </div>
+
+            <div class="form-group">
+              <label>Rasm URL</label>
+              <input id="productImage" placeholder="https://..." />
+            </div>
+
+          </div>
+
+          <div class="form-group">
+            <label>Tavsif</label>
+            <textarea id="productDescription"></textarea>
+          </div>
+
+          <button onclick="createProduct()">Mahsulot qo‘shish</button>
+
+          <div id="productMessage"></div>
+        </div>
+
+        <div class="card">
+          <h3>📦 Mahsulotlar ro‘yxati</h3>
+          <div id="productsList"></div>
+        </div>
+
+      </section>
+
+
+      <!-- CATEGORIES -->
+
+      <section id="categories" class="section">
+
+        <div class="card">
+          <h3>➕ Kategoriya qo‘shish</h3>
+
+          <div class="grid">
+
+            <div class="form-group">
+              <label>Nomi</label>
+              <input id="categoryName" placeholder="Masalan: Ichimliklar" />
+            </div>
+
+            <div class="form-group">
+              <label>Slug</label>
+              <input id="categorySlug" placeholder="ichimliklar" />
+            </div>
+
+          </div>
+
+          <button onclick="createCategory()">Kategoriya qo‘shish</button>
+        </div>
+
+        <div class="card">
+          <h3>📂 Kategoriyalar</h3>
+          <div id="categoriesList"></div>
+        </div>
+
+      </section>
+
+
+      <!-- ORDERS -->
+
+      <section id="orders" class="section">
+
+        <div class="card">
+          <h3>🧾 Buyurtmalar</h3>
+          <button onclick="loadOrders()">🔄 Yangilash</button>
+        </div>
+
+        <div id="ordersList"></div>
+
+      </section>
+
+
+      <!-- WORKERS -->
+
+      <section id="workers" class="section">
+
+        <div class="card">
+          <h3>👨‍💼 Ishchi qo‘shish</h3>
+
+          <div class="grid">
+
+            <div class="form-group">
+              <label>Telegram ID</label>
+              <input id="workerTelegramId" placeholder="123456789" />
+            </div>
+
+            <div class="form-group">
+              <label>Ism</label>
+              <input id="workerName" placeholder="Ishchi ismi" />
+            </div>
+
+            <div class="form-group">
+              <label>Kategoriya</label>
+              <select id="workerCategory"></select>
+            </div>
+
+          </div>
+
+          <button onclick="createWorker()">Ishchi qo‘shish</button>
+        </div>
+
+        <div class="card">
+          <h3>👥 Ishchilar</h3>
+          <div id="workersList"></div>
+        </div>
+
+      </section>
+
+
+      <!-- PROPOSALS -->
+
+      <section id="proposals" class="section">
+
+        <div class="card">
+          <h3>💡 Ishchilar takliflari</h3>
+          <button onclick="loadProposals()">🔄 Yangilash</button>
+        </div>
+
+        <div id="proposalsList"></div>
+
+      </section>
+
+
+      <!-- ANALYTICS -->
+
+      <section id="analytics" class="section">
+
+        <div class="card">
+          <h3>📈 Tahlil</h3>
+
+          <button onclick="loadAnalytics()">🔄 Tahlilni yangilash</button>
+
+          <div id="analyticsResult" style="margin-top:15px"></div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+<script>
+  const API =
+    window.API_URL ||
+    localStorage.getItem("tegen_api_url") ||
+    location.origin;
+
+  let token = localStorage.getItem("tegen_admin_token") || "";
+
+  const money = value =>
+    Number(value || 0).toLocaleString("uz-UZ") + " so‘m";
+
+
+  function login() {
+    const input = document.getElementById("tokenInput").value.trim();
+
+    if (!input) {
+      document.getElementById("loginError").textContent =
+        "Token kiriting.";
+      return;
+    }
+
+    token = input;
+    localStorage.setItem("tegen_admin_token", token);
+
+    showAdmin();
+  }
+
+
+  function logout() {
+    localStorage.removeItem("tegen_admin_token");
+    location.reload();
+  }
+
+
+  function showAdmin() {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("adminPage").classList.remove("hidden");
+
+    loadAll();
+  }
+
+
+  function showTab(id, button) {
+    document.querySelectorAll(".section")
+      .forEach(section => section.classList.remove("active"));
+
+    document.querySelectorAll(".tabs button")
+      .forEach(btn => btn.classList.remove("active"));
+
+    document.getElementById(id).classList.add("active");
+
+    if (button) {
+      button.classList.add("active");
+    }
+
+    if (id === "dashboard") loadStats();
+    if (id === "products") loadProducts();
+    if (id === "categories") loadCategories();
+    if (id === "orders") loadOrders();
+    if (id === "workers") loadWorkers();
+    if (id === "proposals") loadProposals();
+    if (id === "analytics") loadAnalytics();
+  }
+
+
+  async function request(path, options = {}) {
+    const headers = {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    };
+
+    if (token) {
+      headers.Authorization = "Bearer " + token;
+    }
+
+    const response = await fetch(API + path, {
+      ...options,
+      headers
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Server xatosi");
+    }
+
+    return response.json();
+  }
+
+
+  async function loadAll() {
+    await Promise.allSettled([
+      loadStats(),
+      loadCategories(),
+      loadProducts(),
+      loadOrders(),
+      loadWorkers(),
+      loadProposals(),
+      loadAnalytics()
+    ]);
+  }
+
+
+  async function loadStats() {
+    try {
+      const data = await request("/admin/stats");
+
+      document.getElementById("statOrders").textContent =
+        data.orders || 0;
+
+      document.getElementById("statProducts").textContent =
+        data.products || 0;
+
+      document.getElementById("statUsers").textContent =
+        data.users || 0;
+
+      document.getElementById("statRevenue").textContent =
+        money(data.revenue);
+
+      document.getElementById("statusStats").innerHTML =
+        (data.status || [])
+          .map(item => `
+            <div class="order-item">
+              <b>${item.status}</b>
+              <span>${item._count?._all || 0} ta</span>
+            </div>
+          `)
+          .join("");
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
+  async function loadCategories() {
+    try {
+      const categories = await request("/catalog/categories");
+
+      const select =
+        document.getElementById("productCategory");
+
+      const workerSelect =
+        document.getElementById("workerCategory");
+
+      const options = categories.map(category =>
+        `<option value="${category.id}">
+          ${escapeHtml(category.name)}
+        </option>`
+      ).join("");
+
+      select.innerHTML = options;
+      workerSelect.innerHTML = options;
+
+      document.getElementById("categoriesList").innerHTML =
+        categories.map(category => `
+          <div class="card">
+            <b>${escapeHtml(category.name)}</b>
+            <div class="muted">
+              slug: ${escapeHtml(category.slug)}
+            </div>
+            <div>
+              ${category.products?.length || 0} ta mahsulot
+            </div>
+
+            <div class="actions">
+              <button
+                onclick="renameCategory(${category.id}, '${escapeJs(category.name)}')">
+                ✏️ Tahrirlash
+              </button>
+
+              <button
+                class="danger"
+                onclick="deleteCategory(${category.id})">
+                🗑 O‘chirish
+              </button>
+            </div>
+          </div>
+        `).join("");
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
+  async function createCategory() {
+    const name =
+      document.getElementById("categoryName").value.trim();
+
+    const slug =
+      document.getElementById("categorySlug").value.trim();
+
+    if (!name) {
+      alert("Kategoriya nomini kiriting.");
+      return;
+    }
+
+    try {
+      await request("/catalog/categories", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          slug: slug || undefined
+        })
+      });
+
+      document.getElementById("categoryName").value = "";
+      document.getElementById("categorySlug").value = "";
+
+      await loadCategories();
+
+      alert("Kategoriya qo‘shildi.");
+
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+
+  async function renameCategory(id, oldName) {
+    const name = prompt(
+      "Yangi kategoriya nomi:",
+      oldName
+    );
+
+    if (!name || name === oldName) return;
+
+    try {
+      await request("/catalog/categories/" + id, {
+        method: "PATCH",
+        body: JSON.stringify({ name })
+      });
+
+      await loadCategories();
+
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+
+  async function deleteCategory(id) {
+    if (!confirm("Bu kategoriyani o‘chirishni tasdiqlaysizmi?")) {
+      return;
+    }
+
+    try {
+      await request("/catalog/categories/" + id, {
+        method: "DELETE"
+      });
+
+      await loadCategories();
+
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+
+  async function loadProducts() {
+    try {
+      const products = await request("/catalog/products");
+
+      document.getElementById("productsList").innerHTML =
+        products.map(product => `
+          <div class="card">
+
+            ${
+              product.image
+              ? `<img class="product-image"
+                     src="${escapeAttr(product.image)}"
+                     onerror="this.style.display='none'">`
+              : ""
+            }
+
+            <h3>${escapeHtml(product.name)}</h3>
+
+            <div>
+              ${
+                product.oldPrice
+                ? `<span class="old-price">
+                    ${money(product.oldPrice)}
+                   </span>`
+                : ""
+              }
+
+              <span class="price">
+                ${money(product.price)}
+              </span>
+            </div>
+
+            <p>${escapeHtml(product.description || "")}</p>
+
+            <div class="muted">
+              Kategoriya:
+              ${escapeHtml(product.category?.name || "-")}
+            </div>
+
+            <div class="actions">
+
+              <button
+                onclick="editProduct(${product.id})">
+                ✏️ Tahrirlash
+              </button>
+
+              <button
+                class="danger"
+                onclick="deleteProduct(${product.id})">
+                🗑 O‘chirish
+              </button>
+
+            </div>
+          </div>
+        `).join("");
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
+  async function createProduct() {
+    const name =
+      document.getElementById("productName").value.trim();
+
+    const categoryId =
+      Number(document.getElementById("productCategory").value);
+
+    const price =
+      Number(document.getElementById("productPrice").value);
+
+    const oldPriceValue =
+      document.getElementById("productOldPrice").value;
+
+    const description =
+      document.getElementById("productDescription").value.trim();
+
+    const image =
+      document.getElementById("productImage").value.trim();
+
+    if (!name || !categoryId || !price) {
+      alert("Nomi, kategoriya va narxni
