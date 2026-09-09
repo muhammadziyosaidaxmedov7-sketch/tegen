@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  NEW
+  ACCEPTED
+  PREPARING
+  READY
+  CANCELLED
+}
+
+enum ProposalAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  telegramId String   @unique
+  phone     String?
+  firstName String?
+  lastName  String?
+  username  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders    Order[]
+  messages  Message[]
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String    @unique
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+  proposals   ProductProposal[]
+  workers     Worker[]
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  categoryId  Int
+  name        String
+  description String?
+  price       Int
+  oldPrice    Int?
+  image       String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  category    Category  @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  proposals   ProductProposal[]
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  orderNumber String      @unique
+  userId      Int
+  phone       String?
+  status      OrderStatus @default(NEW)
+  total       Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+  messages    Message[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  name      String
+  price     Int
+  quantity  Int
+  total     Int
+
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Worker {
+  id          Int      @id @default(autoincrement())
+  telegramId  String   @unique
+  name        String?
+  categoryId  Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  category    Category  @relation(fields: [categoryId], references: [id])
+  proposals   ProductProposal[]
+}
+
+model ProductProposal {
+  id          Int            @id @default(autoincrement())
+  workerId    Int
+  categoryId  Int
+  productId   Int?
+  action      ProposalAction
+  status      ProposalStatus @default(PENDING)
+  name        String?
+  description String?
+  price       Int?
+  oldPrice    Int?
+  image       String?
+  analysis    String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  worker      Worker         @relation(fields: [workerId], references: [id])
+  category    Category       @relation(fields: [categoryId], references: [id])
+  product     Product?       @relation(fields: [productId], references: [id])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  orderId    Int?
+  text       String?
+  fileUrl    String?
+  isFromUser Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+  order      Order?   @relation(fields: [orderId], references: [id])
+}
