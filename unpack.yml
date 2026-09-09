@@ -1,0 +1,46 @@
+name: Extract TEGEN project
+
+on:
+  push:
+    paths:
+      - "tegen-updated.zip"
+      - ".github/workflows/unpack.yml"
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install unzip
+        run: sudo apt-get update && sudo apt-get install -y unzip
+
+      - name: Extract TEGEN project
+        run: |
+          rm -rf extracted
+          mkdir extracted
+
+          unzip -o tegen-updated.zip -d extracted
+
+          cp -a extracted/tegen-main/. .
+
+          rm -rf extracted
+          rm -f tegen-updated.zip
+          rm -f unpack.yml
+
+      - name: Commit extracted project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          git commit -m "Add TEGEN project files" || echo "Nothing to commit"
+
+          git push
