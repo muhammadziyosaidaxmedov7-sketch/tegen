@@ -1,0 +1,19 @@
+{
+  "name": "tegen",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "server"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/mini-app run dev",
+    "dev:api": "npm --workspace server run start:dev",
+    "dev:admin": "npm --workspace apps/admin run dev",
+    "build:web": "npm --workspace apps/mini-app run build",
+    "build:api": "npm --workspace server run build",
+    "build:admin": "npm --workspace apps/admin run build",
+    "db:push": "npm --workspace server run prisma:push",
+    "db:seed": "npm --workspace server run db:seed"
+  }
+}
